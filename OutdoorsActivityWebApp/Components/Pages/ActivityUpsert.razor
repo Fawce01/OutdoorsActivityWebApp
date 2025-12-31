@@ -1,7 +1,11 @@
-﻿@using OutdoorsActivityWebApp.Data.Models
-@using OutdoorsActivityWebApp.Data.Utilities
+﻿@using Microsoft.AspNetCore.Authorization
+
+@inject IActivityRepository _activityRepository
+@inject AuthenticationStateProvider _AuthenticationStateProvider
 
 @page "/CreateActivity"
+
+@attribute [Authorize]
 
 <div class="card shadow border-0 m-4">
     <div class="card-header bg-black bg-gradient m-lg-0 py-3">
@@ -35,6 +39,12 @@
                                 <option value="@type">@type.ToReadableString()</option>
                             }    
                         </InputSelect>
+                        @if (Activity.Type == SD.ActivityType.Other)
+                        {
+                            <br/>
+                            <label for="other">Other Activity Type Name</label>
+                            <InputText @bind-Value="Activity.OtherTypeName" class="form-control" id="other" />
+                        }
                         <label for="AcType">Activity Type</label>
                         <ValidationMessage For="@(() => Activity.Type)" />
                     </div>
@@ -56,12 +66,31 @@
     </div>
 </div>
 @code {
-    public int ActivityId { get; set; }
+
+    public int ActivityId { get; set; } = 0;
     private Activity Activity { get; set; } = new Activity();
 
-    public void UpsertActivity()
+    protected override async Task OnInitializedAsync()
     {
-        
+        var authState = await _AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        Activity.InstructorUserId = user.FindFirst(u => u.Type.Contains("nameidentifier")).Value;
+        Activity.OtherTypeName = "";
+    }
+
+    public async Task UpsertActivity()
+    {
+        if (ActivityId == 0)
+        {
+            // create new activity
+            await _activityRepository.CreateAsync(Activity);
+        }
+        else
+        {
+            // update activity
+            await _activityRepository.UpdateAsync(Activity);
+        }
     }
 
 }

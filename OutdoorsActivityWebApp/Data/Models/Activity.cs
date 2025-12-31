@@ -8,7 +8,7 @@ namespace OutdoorsActivityWebApp.Data.Models
     {
         public int Id { get; set; }
         [Required]
-        public int InstructorUserId { get; set; }
+        public string InstructorUserId { get; set; }
         public ApplicationUser Instructor { get; set; }
         [Required]
         public ActivityType Type { get; set; }

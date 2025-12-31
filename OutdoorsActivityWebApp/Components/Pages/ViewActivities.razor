@@ -1,0 +1,91 @@
+﻿@page "/Activities"
+@inject IActivityRepository _activityRepository
+
+<h3>ViewActivities</h3>
+
+@if (isProcessing)
+{
+    <div class="position-absolute w-100 h-100 d-flex flex-column align-items-center
+                bg-white justify-content-center">
+        <p>loading</p>
+    </div>
+}
+else
+{
+    <div class="card shadow border-0 m-4">
+        <div class="card-header bg-black bg-gradient m-lg-0 py-3">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h2 class="text-white py-2">Activity List</h2>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-4">
+            <div class="row pb-3">
+                <div class="col-12 text-end">
+                    <a class="btn btn-secondary btn-lg" style="width:250px" href="category/create"><i class="bi bi-plus-circle"></i> Add New Activity</a>
+                </div>
+            </div>
+            <p>Activity List</p>
+            @if (ActivityList.Any())
+            {
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Instructor</th>
+                            <th>Activity</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var activity in ActivityList)
+                        {
+                            <tr>
+                                <td>
+                                    @activity.Title
+                                </td>
+                                <td>
+                                    @activity.Instructor.UserName
+                                </td>
+                                <td>
+                                    @activity.Type
+                                </td>
+                                <td>
+                                    <a href="@($"category/update/{activity.Id}")" class="btn btn-primary"><i class="bi bi-pencil"></i> Edit</a>
+                                    <button class="btn btn-danger" @onclick="() => handleDelete(activity.Id)">
+                                        <i class="bi bi-x-circle"></i> Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private bool isProcessing { get; set; } = true;
+    private IEnumerable<Activity> ActivityList { get; set; } = new List<Activity>();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadActivities();
+            isProcessing = false;
+            StateHasChanged();
+        }
+    }
+    private async Task LoadActivities()
+    {
+        ActivityList = await _activityRepository.GetAllAsync();
+    }
+
+    private async Task handleDelete(int activityId)
+    {
+        await _activityRepository.DeleteAsync(activityId);
+    }
+}

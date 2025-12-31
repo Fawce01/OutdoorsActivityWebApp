@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using OutdoorsActivityWebApp.Components;
 using OutdoorsActivityWebApp.Components.Account;
 using OutdoorsActivityWebApp.Data;
+using OutdoorsActivityWebApp.Data.Models;
+using OutdoorsActivityWebApp.Data.Models.Repository;
+using OutdoorsActivityWebApp.Data.Models.Repository.IRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +15,9 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
+builder.Services.AddScoped<IActivityReviewRespository, ActivityReviewRepository>();
+builder.Services.AddScoped<IInstructorReviewRepository, InstructorReviewRepository>();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
