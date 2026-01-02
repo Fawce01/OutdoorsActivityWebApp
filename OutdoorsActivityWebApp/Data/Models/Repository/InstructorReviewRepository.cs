@@ -52,7 +52,7 @@ namespace OutdoorsActivityWebApp.Data.Models.Repository
         {
             return await _db.InstructorReviews
                 .AsNoTracking()
-                .Where(u => u.InstructorId == instructorId)
+                .Where(u => u.InstructorUserId == instructorId)
                 .ToListAsync();
         }
 

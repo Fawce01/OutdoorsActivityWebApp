@@ -1,11 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OutdoorsActivityWebApp.Data.Models
 {
     public class InstructorReview : Review
     {
-        public string InstructorId { get; set; }
+        [Required]
+        public string InstructorUserId { get; set; }
+        [ForeignKey("InstructorUserId")]
         public ApplicationUser Instructor { get; set; }
     }
 }

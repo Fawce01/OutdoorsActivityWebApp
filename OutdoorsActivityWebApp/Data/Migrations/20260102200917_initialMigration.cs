@@ -5,7 +5,7 @@
 namespace OutdoorsActivityWebApp.Migrations
 {
     /// <inheritdoc />
-    public partial class firstMigration : Migration
+    public partial class initialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

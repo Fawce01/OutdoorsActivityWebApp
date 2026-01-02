@@ -5,33 +5,44 @@ using System.Reflection.Emit;
 
 namespace OutdoorsActivityWebApp.Data;
 
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
     public DbSet<Activity> Activities { get; set; }
     public DbSet<ActivityReview> ActivityReviews { get; set; }
     public DbSet<InstructorReview> InstructorReviews { get; set; }
 
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        : base(options)  // Make sure to pass options to the base class constructor
+    {
+    }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
 
-        builder.Entity<InstructorReview>().HasOne(r => r.Instructor)
+        builder.Entity<Activity>()
+            .HasOne(a => a.Instructor)
             .WithMany()
-            .HasForeignKey(r => r.InstructorId)
+            .HasForeignKey(a => a.InstructorUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.Entity<InstructorReview>().HasOne(r => r.Customer)
+        builder.Entity<ActivityReview>()
+            .HasOne(ar => ar.Activity)
+            .WithMany(a => a.Reviews)
+            .HasForeignKey(ar => ar.ActivityId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<InstructorReview>()
+            .HasOne(ir => ir.Instructor)
+            .WithMany()
+            .HasForeignKey(ir => ir.InstructorUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Review>()
+            .HasOne(r => r.Customer)
             .WithMany()
             .HasForeignKey(r => r.CustomerId)
             .OnDelete(DeleteBehavior.Restrict);
-        
-        builder.Entity<ActivityReview>()
-        .HasIndex(r => new { r.ActivityId, r.CustomerId })
-        .IsUnique();
-
-        builder.Entity<InstructorReview>()
-            .HasIndex(r => new { r.InstructorId, r.CustomerId })
-            .IsUnique();
     }
-
 }
+

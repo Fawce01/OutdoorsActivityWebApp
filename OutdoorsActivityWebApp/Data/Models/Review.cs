@@ -8,6 +8,7 @@ namespace OutdoorsActivityWebApp.Data.Models
         public int Id { get; set; }
         [Required]
         public string CustomerId { get; set; }
+        [ForeignKey("CustomerId")]
         public ApplicationUser Customer { get; set; }
         public string Title { get; set; }
         public string Body { get; set; }

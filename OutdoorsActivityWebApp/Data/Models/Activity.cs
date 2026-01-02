@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using static OutdoorsActivityWebApp.Data.Utilities.SD;
 
 namespace OutdoorsActivityWebApp.Data.Models
@@ -9,6 +10,7 @@ namespace OutdoorsActivityWebApp.Data.Models
         public int Id { get; set; }
         [Required]
         public string InstructorUserId { get; set; }
+        [ForeignKey("InstructorUserId")]
         public ApplicationUser Instructor { get; set; }
         [Required]
         public ActivityType Type { get; set; }

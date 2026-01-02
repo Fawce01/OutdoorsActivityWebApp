@@ -2,8 +2,10 @@
 
 @inject IActivityRepository _activityRepository
 @inject AuthenticationStateProvider _AuthenticationStateProvider
+@inject NavigationManager _nm
 
 @page "/CreateActivity"
+@page "/UpdateActivity/{ActivityId:int}"
 
 @attribute [Authorize]
 
@@ -30,6 +32,7 @@
                         <br/>
                         <InputText @bind-Value="Activity.Desc" class="form-control" id="Description" />
                         <ValidationMessage For="@(() => Activity.Desc)" />
+                        
                     </div>
                     <div class="form-floating py-3 col-12">
                         <InputSelect @bind-Value="Activity.Type" class="form-control" id="AcType">
@@ -55,7 +58,7 @@
                             </button>
                         </div>
                         <div class="col-6 col-md-3">
-                            <a class="btn btn-secondary form-control" href="product">
+                            <a class="btn btn-secondary form-control" href="Activities">
                                 <i class="bi bi-x-octagon"></i> Cancel
                             </a>
                         </div>
@@ -67,16 +70,27 @@
 </div>
 @code {
 
+    [Parameter]
     public int ActivityId { get; set; } = 0;
     private Activity Activity { get; set; } = new Activity();
+    private bool isAuthorized { get; set; } = false;
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await _AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
-        Activity.InstructorUserId = user.FindFirst(u => u.Type.Contains("nameidentifier")).Value;
-        Activity.OtherTypeName = "";
+        if (ActivityId == 0)
+        {
+            // create activity
+            Activity.InstructorUserId = user.FindFirst(u => u.Type.Contains("nameidentifier")).Value;
+            Activity.OtherTypeName = "";
+        }
+        else
+        {
+            // edit activity
+            Activity = await _activityRepository.GetAsync(ActivityId);
+        }
     }
 
     public async Task UpsertActivity()
@@ -85,11 +99,13 @@
         {
             // create new activity
             await _activityRepository.CreateAsync(Activity);
+            _nm.NavigateTo("/Activities");
         }
         else
         {
             // update activity
             await _activityRepository.UpdateAsync(Activity);
+            _nm.NavigateTo("/Activities");
         }
     }
 

@@ -12,8 +12,8 @@ using OutdoorsActivityWebApp.Data;
 namespace OutdoorsActivityWebApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251231144014_AddingActivityAndReviewTables2")]
-    partial class AddingActivityAndReviewTables2
+    [Migration("20260102200917_initialMigration")]
+    partial class initialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -235,11 +235,13 @@ namespace OutdoorsActivityWebApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("InstructorId")
+                    b.Property<string>("InstructorUserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("InstructorUserId")
-                        .HasColumnType("int");
+                    b.Property<string>("LongDesc")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("OtherTypeName")
                         .IsRequired()
@@ -254,88 +256,76 @@ namespace OutdoorsActivityWebApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("InstructorId");
+                    b.HasIndex("InstructorUserId");
 
                     b.ToTable("Activities");
                 });
 
-            modelBuilder.Entity("OutdoorsActivityWebApp.Data.Models.ActivityReview", b =>
+            modelBuilder.Entity("OutdoorsActivityWebApp.Data.Models.Review", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Anon")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CustomerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("nvarchar(21)");
+
+                    b.Property<decimal>("Rating")
+                        .HasColumnType("decimal(2, 1)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("Review");
+
+                    b.HasDiscriminator().HasValue("Review");
+
+                    b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("OutdoorsActivityWebApp.Data.Models.ActivityReview", b =>
+                {
+                    b.HasBaseType("OutdoorsActivityWebApp.Data.Models.Review");
 
                     b.Property<int>("ActivityId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("Anon")
-                        .HasColumnType("bit");
+                    b.HasIndex("ActivityId");
 
-                    b.Property<string>("Body")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CustomerId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<decimal>("Rating")
-                        .HasColumnType("decimal(2, 1)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("ActivityId", "CustomerId")
-                        .IsUnique();
-
-                    b.ToTable("ActivityReviews");
+                    b.HasDiscriminator().HasValue("ActivityReview");
                 });
 
             modelBuilder.Entity("OutdoorsActivityWebApp.Data.Models.InstructorReview", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.HasBaseType("OutdoorsActivityWebApp.Data.Models.Review");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Anon")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Body")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CustomerId")
+                    b.Property<string>("InstructorUserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("InstructorId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.HasIndex("InstructorUserId");
 
-                    b.Property<decimal>("Rating")
-                        .HasColumnType("decimal(2, 1)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("InstructorId", "CustomerId")
-                        .IsUnique();
-
-                    b.ToTable("InstructorReviews");
+                    b.HasDiscriminator().HasValue("InstructorReview");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -393,9 +383,22 @@ namespace OutdoorsActivityWebApp.Migrations
                 {
                     b.HasOne("OutdoorsActivityWebApp.Data.ApplicationUser", "Instructor")
                         .WithMany()
-                        .HasForeignKey("InstructorId");
+                        .HasForeignKey("InstructorUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Instructor");
+                });
+
+            modelBuilder.Entity("OutdoorsActivityWebApp.Data.Models.Review", b =>
+                {
+                    b.HasOne("OutdoorsActivityWebApp.Data.ApplicationUser", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("OutdoorsActivityWebApp.Data.Models.ActivityReview", b =>
@@ -403,35 +406,19 @@ namespace OutdoorsActivityWebApp.Migrations
                     b.HasOne("OutdoorsActivityWebApp.Data.Models.Activity", "Activity")
                         .WithMany("Reviews")
                         .HasForeignKey("ActivityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("OutdoorsActivityWebApp.Data.ApplicationUser", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Activity");
-
-                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("OutdoorsActivityWebApp.Data.Models.InstructorReview", b =>
                 {
-                    b.HasOne("OutdoorsActivityWebApp.Data.ApplicationUser", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("OutdoorsActivityWebApp.Data.ApplicationUser", "Instructor")
                         .WithMany()
-                        .HasForeignKey("InstructorId")
+                        .HasForeignKey("InstructorUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Customer");
 
                     b.Navigation("Instructor");
                 });

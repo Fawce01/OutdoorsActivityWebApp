@@ -1,0 +1,84 @@
+﻿@inject NavigationManager _nm
+@inject AuthenticationStateProvider _AuthenticationStateProvider
+
+<div class="card mb-2 p-0">
+    <div class="card-header">
+        <h2>@activity.Title</h2>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <p>@activity.Desc</p>
+        </div>
+        <div class="row">
+            <p><strong>@activity.Type.ToString().ToReadableString()</strong></p>
+        </div>
+        <div class="row">
+            <p>@activity.Instructor.UserName</p>
+        </div>
+        @if (ActivityEditable)
+        {
+            <div class="row">
+                <div class="col-1">
+                    <btn class="btn btn-sm btn-light btn-outline-dark" @onclick="()=>ButtonClick(ButtonAction.Edit)">Edit</btn>
+                </div>
+                <div class="col-2">
+                    <btn class="btn btn-sm btn-danger" @onclick="()=>ButtonClick(ButtonAction.Delete)">Delete</btn>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Activity activity { get; set; } = new Activity();
+    public bool ActivityEditable { get; set; } = false;
+
+
+    public enum ButtonAction
+    {
+        Edit,
+        Delete
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        SetEditable();
+    }
+
+    private async Task SetEditable()
+    {
+        var authState = await _AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var id = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        if (user.IsInRole(SD.Role_Instructor))
+        {
+            if (activity.InstructorUserId == id)
+            {
+                // User logged in matches activity user id
+                ActivityEditable = true;
+            }
+            else
+            {
+                ActivityEditable = false;
+            }
+        }
+    }
+
+    public void ButtonClick(ButtonAction action)
+    {
+        switch (action)
+        {
+            case ButtonAction.Edit:
+                _nm.NavigateTo($"/UpdateActivity/{activity.Id}");
+                break;
+            case ButtonAction.Delete:
+                // Confirm delete
+                // do delete
+                break;
+            default:
+                break;
+        }
+    }
+}

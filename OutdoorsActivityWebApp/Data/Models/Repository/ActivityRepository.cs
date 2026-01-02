@@ -25,7 +25,9 @@ namespace OutdoorsActivityWebApp.Data.Models.Repository
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var activityToDelete = await _db.Activities.FirstOrDefaultAsync(u => u.Id == id);
+            var activityToDelete = await _db.Activities
+                .Include(a => a.Instructor)
+                .FirstOrDefaultAsync(u => u.Id == id);
 
             if (activityToDelete != null)
             {
@@ -55,7 +57,9 @@ namespace OutdoorsActivityWebApp.Data.Models.Repository
 
         public async Task<Activity> GetAsync(int id)
         {
-            var activityFetched = await _db.Activities.FirstOrDefaultAsync(u => u.Id == id);
+            var activityFetched = await _db.Activities
+                .Include(a => a.Instructor)
+                .FirstOrDefaultAsync(u => u.Id == id);
 
             if (activityFetched != null)
             {
