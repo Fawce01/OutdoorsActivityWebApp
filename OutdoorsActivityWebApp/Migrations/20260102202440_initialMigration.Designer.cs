@@ -12,7 +12,7 @@ using OutdoorsActivityWebApp.Data;
 namespace OutdoorsActivityWebApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260102200917_initialMigration")]
+    [Migration("20260102202440_initialMigration")]
     partial class initialMigration
     {
         /// <inheritdoc />

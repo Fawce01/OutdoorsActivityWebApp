@@ -10,7 +10,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Activity> Activities { get; set; }
     public DbSet<ActivityReview> ActivityReviews { get; set; }
     public DbSet<InstructorReview> InstructorReviews { get; set; }
-
+    public DbSet<Review> Review { get; set; }
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)  // Make sure to pass options to the base class constructor
     {

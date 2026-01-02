@@ -1,0 +1,26 @@
+﻿<div class="card mb-2 p-0">
+    <div class="card-header">
+        <h2>@review.Title</h2>
+        @if (!review.Anon)
+        {
+            <p>@review.Customer.UserName</p>
+        }
+        else
+        {
+            <p>anonymous customer</p>
+        }
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <p>@review.Body</p>
+        </div>
+        <div class="row">
+            <p>Rating: <strong>@review.Rating</strong></p>
+        </div>
+    </div>
+</div>    
+
+@code {
+    [Parameter]
+    public ActivityReview review { get; set; }
+}

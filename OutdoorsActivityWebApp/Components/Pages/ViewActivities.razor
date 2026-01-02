@@ -1,4 +1,5 @@
 ﻿@page "/Activities"
+@inject NavigationManager _nm
 @inject IActivityRepository _activityRepository
 @inject AuthenticationStateProvider _AuthenticationStateProvider
 @using OutdoorsActivityWebApp.Components.Pages.Reused
@@ -49,7 +50,7 @@ else
                 @foreach (var activity in ActivityList)
                 {
                     <div class="row">
-                        <ActivityCard Activity="@activity"></ActivityCard>
+                        <ActivityCard Activity="@activity" OnRefreshRequested="RefreshPage"></ActivityCard>
                     </div>
                 }
             }
@@ -58,6 +59,7 @@ else
 }
 
 @code {
+
     private bool isProcessing { get; set; } = true;
     private IEnumerable<Activity> ActivityList { get; set; } = new List<Activity>();
     public bool ShowInstructorSpecific { get; set; } = false;
@@ -140,4 +142,10 @@ else
         FilterType(filterType);
         return;
     }
+
+    private void RefreshPage()
+    {
+        _nm.NavigateTo(_nm.Uri, forceLoad: true);
+    }
+
 }

@@ -19,6 +19,8 @@ namespace OutdoorsActivityWebApp.Data.Models
         public string Title { get; set; }
         [Required]
         public string Desc { get; set; }
+        [Required]
+        public string LongDesc { get; set; }
         public ICollection<ActivityReview> Reviews { get; set; }
     }
 }

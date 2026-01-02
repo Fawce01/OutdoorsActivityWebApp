@@ -32,7 +32,12 @@
                         <br/>
                         <InputText @bind-Value="Activity.Desc" class="form-control" id="Description" />
                         <ValidationMessage For="@(() => Activity.Desc)" />
-                        
+                    </div>
+                    <div class="form-floating py-3 col-12">
+                        <label for="longdesc">Long Description</label>
+                        <br />
+                        <InputText @bind-Value="Activity.LongDesc" class="form-control" id="longdesc" />
+                        <ValidationMessage For="@(() => Activity.LongDesc)" />
                     </div>
                     <div class="form-floating py-3 col-12">
                         <InputSelect @bind-Value="Activity.Type" class="form-control" id="AcType">
@@ -95,6 +100,7 @@
 
     public async Task UpsertActivity()
     {
+        var hello = "Hello";
         if (ActivityId == 0)
         {
             // create new activity

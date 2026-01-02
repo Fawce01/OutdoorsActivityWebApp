@@ -1,0 +1,30 @@
+﻿<div class="card mb-2 p-0">
+    <div class="card-header">
+        <label for="title">Title</label>
+        <InputText @bind-Value="review.Title" id="title"></InputText>
+        <h2>@review.Title</h2>
+        Anonymous Review: <input type="checkbox" @bind-value="review.Anon" />
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <label for="body">Title</label>
+            <InputText @bind-Value="review.Body" id="body"></InputText>
+        </div>
+        <div class="row">
+            <label for="rating">Rating</label>
+            <InputNumber @bind-Value="review.Rating" id="rating"></InputNumber>
+        </div>
+        <button class="btn btn-sm btn-light" onclick="SubmitReview">Submit</button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Activity activity { get; set; } = new Activity();
+    public ActivityReview review { get; set; } = new ActivityReview();
+
+    private async Task SubmitReview()
+    {
+        
+    }
+}

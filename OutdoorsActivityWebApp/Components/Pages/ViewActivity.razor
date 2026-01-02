@@ -1,0 +1,17 @@
+﻿@page "/ViewActivity/{ActivityId:int}"
+@inject IActivityRepository _ar
+@using OutdoorsActivityWebApp.Components.Pages.Reused
+
+<ActivityCard activity="SelectedActivity" FullActivity=true></ActivityCard>
+
+@code {
+    [Parameter]
+    public int ActivityId { get; set; }
+    public Activity SelectedActivity { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        SelectedActivity = await _ar.GetAsync(ActivityId);
+    }
+
+}
