@@ -9,7 +9,7 @@
     public int ActivityId { get; set; }
     public Activity SelectedActivity { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
         SelectedActivity = await _ar.GetAsync(ActivityId);
     }

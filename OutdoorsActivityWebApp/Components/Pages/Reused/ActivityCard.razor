@@ -35,7 +35,7 @@
                         <p>Reviews</p>
                         @foreach (var review in activity.Reviews)
                         {
-                            <ActivityReviewCard review="review"></ActivityReviewCard>
+                            <ActivityReviewCard reviewId="review.Id"></ActivityReviewCard>
                         }
                     }
                     @if (IsCustomer)
@@ -81,7 +81,9 @@
 
 @code {
     [Parameter]
-    public Activity activity { get; set; } = new Activity();
+    public int ActivityId { get; set; }
+
+    public Activity activity { get; set; }
 
     [Parameter]
     public EventCallback OnRefreshRequested { get; set; }
@@ -105,6 +107,8 @@
 
     protected override async Task OnParametersSetAsync()
     {
+        activity = await _activityRepository.GetAsync(ActivityId);
+
         SetEditable();
 
         var authState = await _AuthenticationStateProvider.GetAuthenticationStateAsync();

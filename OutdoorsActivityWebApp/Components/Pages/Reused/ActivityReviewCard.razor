@@ -1,26 +1,57 @@
-﻿<div class="card mb-2 p-0">
-    <div class="card-header">
-        <h2>@review.Title</h2>
-        @if (!review.Anon)
-        {
-            <p>@review.Customer.UserName</p>
-        }
-        else
-        {
-            <p>anonymous customer</p>
-        }
-    </div>
-    <div class="card-body">
-        <div class="row">
-            <p>@review.Body</p>
+﻿@inject IActivityReviewRepository _arr
+@inject IActivityRepository _ar
+@if (review != null)
+{
+    <div class="card mb-2 p-0">
+        <div class="card-header">
+            <h2>@review.Title</h2>
+            @if (!review.Anon)
+            {
+                <p>@review.Customer.UserName</p>
+            }
+            else
+            {
+                <p>anonymous customer</p>
+            }
         </div>
-        <div class="row">
-            <p>Rating: <strong>@review.Rating</strong></p>
+        <div class="card-body">
+            <div class="row">
+                <p>@review.Body</p>
+            </div>
+            <div class="row">
+                <p>Rating: <strong>@review.Rating</strong></p>
+            </div>
+            @if (thisUserAddedReview)
+            {
+                <div class="row">
+                    <button class="btn btn-sm btn-danger" @onclick="DeleteReview">Delete</button>
+                </div>
+            }
         </div>
     </div>
-</div>    
+}
 
 @code {
     [Parameter]
+    public int reviewId { get; set; }
+
     public ActivityReview review { get; set; }
+
+    public bool thisUserAddedReview { get; set; }
+
+    protected async override Task OnParametersSetAsync()
+    {
+        review = await _arr.GetAsync(reviewId);
+    }
+
+    private async Task DeleteReview()
+    {
+        // delete review from activity's review list
+        review.Activity.Reviews.Remove(review);
+        _ar.UpdateAsync(review.Activity);
+
+        // delete review
+        _arr.DeleteAsync(review.Id);
+    }
+
 }

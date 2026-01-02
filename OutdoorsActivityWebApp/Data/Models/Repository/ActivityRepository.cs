@@ -68,7 +68,6 @@ namespace OutdoorsActivityWebApp.Data.Models.Repository
             }
             return new Activity();
         }
-
         public async Task<Activity> UpdateAsync(Activity obj)
         {
             var activityFromDb = await _db.Activities.FirstOrDefaultAsync(u => u.Id == obj.Id);
@@ -81,6 +80,7 @@ namespace OutdoorsActivityWebApp.Data.Models.Repository
                 activityFromDb.Desc = obj.Desc;
                 activityFromDb.Type = obj.Type;
                 activityFromDb.OtherTypeName = obj.OtherTypeName;
+                activityFromDb.Reviews = obj.Reviews;
 
                 _db.Activities.Update(activityFromDb);
                 await _db.SaveChangesAsync();
