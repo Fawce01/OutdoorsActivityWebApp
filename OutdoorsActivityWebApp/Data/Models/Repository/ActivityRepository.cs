@@ -40,10 +40,21 @@ namespace OutdoorsActivityWebApp.Data.Models.Repository
 
         public async Task<IEnumerable<Activity>> GetAllAsync()
         {
-            return await _db.Activities
+            List<Activity> activities = new List<Activity>();
+
+            activities = await _db.Activities
                 .AsNoTracking()
                 .Include(a=>a.Instructor)
                 .ToListAsync();
+
+            foreach(var act in activities)
+            {
+                act.Reviews = _db.ActivityReviews
+                    .Include(a => a.Customer)
+                    .Where(u => u.ActivityId == act.Id).ToList();
+            }
+
+            return activities;
         }
 
         public async Task<IEnumerable<Activity>> GetAllFromInstructorAsync(string instructorId)
@@ -64,8 +75,15 @@ namespace OutdoorsActivityWebApp.Data.Models.Repository
             if (activityFetched != null)
             {
                 // activity was fetched successfully
+                // Get activity reviews
+                activityFetched.Reviews = await _db.ActivityReviews
+                    .Include(a => a.Customer)
+                    .Where(u => u.ActivityId == id).ToListAsync();
+                
+                // return activity
                 return activityFetched;
             }
+            // No activity found - return empty activity
             return new Activity();
         }
         public async Task<Activity> UpdateAsync(Activity obj)

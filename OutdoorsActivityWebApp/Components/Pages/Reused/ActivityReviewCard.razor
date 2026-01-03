@@ -33,16 +33,9 @@
 
 @code {
     [Parameter]
-    public int reviewId { get; set; }
-
     public ActivityReview review { get; set; }
 
     public bool thisUserAddedReview { get; set; }
-
-    protected async override Task OnParametersSetAsync()
-    {
-        review = await _arr.GetAsync(reviewId);
-    }
 
     private async Task DeleteReview()
     {

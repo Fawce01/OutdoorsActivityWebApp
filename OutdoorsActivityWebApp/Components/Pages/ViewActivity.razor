@@ -2,16 +2,19 @@
 @inject IActivityRepository _ar
 @using OutdoorsActivityWebApp.Components.Pages.Reused
 
-<ActivityCard activity="SelectedActivity" FullActivity=true></ActivityCard>
+<ActivityCard activity="SelectedActivity" FullActivity="fullActivity"></ActivityCard>
 
 @code {
     [Parameter]
     public int ActivityId { get; set; }
     public Activity SelectedActivity { get; set; }
+    public bool fullActivity { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
         SelectedActivity = await _ar.GetAsync(ActivityId);
+        fullActivity = true;
+        var hello = "hello";
     }
 
 }

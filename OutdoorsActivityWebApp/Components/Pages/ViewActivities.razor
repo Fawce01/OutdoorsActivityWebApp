@@ -50,7 +50,7 @@ else
                 @foreach (var activity in ActivityList)
                 {
                     <div class="row">
-                        <ActivityCard ActivityId="@activity.Id" OnRefreshRequested="RefreshPage"></ActivityCard>
+                        <ActivityCard activity="@activity" OnRefreshRequested="RefreshPage"></ActivityCard>
                     </div>
                 }
             }

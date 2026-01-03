@@ -33,20 +33,28 @@
                     {
                         <br />
                         <p>Reviews</p>
-                        @foreach (var review in activity.Reviews)
+                        <p>Average Score: <strong>@AverageRating</strong></p>
+                        <p class="col-3">View Reviews: </p> <input type="checkbox" @onchange="ToggleReviews" class="col-1"/>
+                        if (ReviewsToggle)
                         {
-                            <ActivityReviewCard reviewId="review.Id"></ActivityReviewCard>
+                            @foreach (var review in activity.Reviews)
+                            {
+                                <ActivityReviewCard review="review"></ActivityReviewCard>
+                            }
                         }
                     }
                     @if (IsCustomer)
                     {
                         @if (!AddingReview)
                         {
-                            <button class="btn btn-sm" @onclick="AddReviewClicked">Add Review</button>
+                            @if (activity.Reviews.FirstOrDefault(u => u.CustomerId == userId) == null)
+                            {
+                                <button class="btn btn-sm" @onclick="AddReviewClicked">Add Review</button>
+                            }
                         }
                         else
                         {
-                            <AddActivityReviewCard activity="activity"></AddActivityReviewCard>
+                            <AddActivityReviewCard activity="activity" CloseReviewEditor="CloseReview" UpdateAverageScore="CalculateAverageRatingScore"></AddActivityReviewCard>
                         }
                     }
                 </div>
@@ -57,21 +65,21 @@
                 @if (ActivityEditable)
                 {
                     <div class="col-1">
-                        <btn class="btn btn-sm btn-light btn-outline-dark" @onclick="()=>ButtonClick(ButtonAction.Edit)">Edit</btn>
+                        <btn class="btn btn-sm btn-light btn-outline-dark" @onclick="()=>ButtonClick(SD.ButtonAction.Edit)">Edit</btn>
                     </div>
                     <div class="col-2">
-                        <btn class="btn btn-sm btn-danger" @onclick="()=>ButtonClick(ButtonAction.Delete)">Delete</btn>
+                        <btn class="btn btn-sm btn-danger" @onclick="()=>ButtonClick(SD.ButtonAction.Delete)">Delete</btn>
                     </div>
                 }
                 @if (!FullActivity){
                     <div class="col-1">
-                        <btn class="btn btn-sm btn-light btn-outline-dark mb-2" @onclick="()=>ButtonClick(ButtonAction.View)">View</btn>
+                        <btn class="btn btn-sm btn-light btn-outline-dark mb-2" @onclick="()=>ButtonClick(SD.ButtonAction.View)">View</btn>
                     </div>
                 }
                 else
                 {
                     <div class="col-2">
-                        <btn class="btn btn-sm btn-light btn-outline-dark" @onclick="()=>ButtonClick(ButtonAction.GoBack)">Go Back</btn>
+                        <btn class="btn btn-sm btn-light btn-outline-dark" @onclick="()=>ButtonClick(SD.ButtonAction.Cancel)">Go Back</btn>
                     </div>
                 }
             </div>
@@ -81,8 +89,6 @@
 
 @code {
     [Parameter]
-    public int ActivityId { get; set; }
-
     public Activity activity { get; set; }
 
     [Parameter]
@@ -97,23 +103,24 @@
 
     public bool AddingReview { get; set; } = false;
 
-    public enum ButtonAction
-    {
-        Edit,
-        Delete,
-        View,
-        GoBack
-    }
+    public double AverageRating { get; set; }
+
+    public bool ReviewsToggle { get; set; } = false;
+
+    public string userId { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
-        activity = await _activityRepository.GetAsync(ActivityId);
+        if (FullActivity)
+        {
+            CalculateAverageRatingScore();
+        }
 
         SetEditable();
 
         var authState = await _AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-        var id = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
         if (user.IsInRole(SD.Role_Customer))
         {
@@ -142,23 +149,23 @@
         }
     }
 
-    public async Task ButtonClick(ButtonAction action)
+    public async Task ButtonClick(SD.ButtonAction action)
     {
         switch (action)
         {
-            case ButtonAction.Edit:
+            case SD.ButtonAction.Edit:
                 _nm.NavigateTo($"/UpdateActivity/{activity.Id}");
                 break;
-            case ButtonAction.Delete:
+            case SD.ButtonAction.Delete:
                 // Confirm delete
                 // do delete
                 _activityRepository.DeleteAsync(activity.Id);
                 await TriggerRefresh();
                 break;
-            case ButtonAction.View:
+            case SD.ButtonAction.View:
                 _nm.NavigateTo($"/ViewActivity/{activity.Id}");
                 break;
-            case ButtonAction.GoBack:
+            case SD.ButtonAction.Cancel:
                 _nm.NavigateTo($"/Activities");
                 break;
             default:
@@ -174,6 +181,23 @@
     private void AddReviewClicked()
     {
         AddingReview = true;
+        StateHasChanged();
+    }
+
+    private void CalculateAverageRatingScore()
+    {
+        var listOfRatings = activity.Reviews.Select(c => c.Rating).ToList();
+        AverageRating = Math.Round(listOfRatings.Average(), 1);
+    }
+
+    private void ToggleReviews()
+    {
+        ReviewsToggle = !ReviewsToggle;
+    }
+
+    private void CloseReview()
+    {
+        AddingReview = false;
         StateHasChanged();
     }
 

@@ -34,6 +34,14 @@ namespace OutdoorsActivityWebApp.Data.Utilities
             Other,
         }
 
+        public enum ButtonAction
+        {
+            Edit,
+            Delete,
+            View,
+            Cancel,
+            Submit
+        }
         public static string SplitUpperTextCase(string value)
         {
             return Regex.Replace(value,

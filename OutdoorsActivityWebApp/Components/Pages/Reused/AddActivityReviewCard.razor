@@ -17,7 +17,10 @@
             <label for="rating">Rating</label>
             <InputNumber @bind-Value="review.Rating" id="rating"></InputNumber>
         </div>
-        <button class="btn btn-sm btn-light" @onclick="SubmitReview">Submit</button>
+        <div class="row">
+            <button class="btn btn-sm btn-light col-2" @onclick="() => ButtonEventHandler(SD.ButtonAction.Submit)">Submit</button>
+            <button class="btn btn-sm btn-primary col-2" @onclick="() => ButtonEventHandler(SD.ButtonAction.Cancel)">Cancel</button>
+        </div>
     </div>
 </div>
 
@@ -26,15 +29,35 @@
     public Activity activity { get; set; } = new Activity();
     public ActivityReview review { get; set; } = new ActivityReview();
 
+    [Parameter]
+    public EventCallback CloseReviewEditor { get; set; }
+    [Parameter]
+    public EventCallback UpdateAverageScore { get; set; }
+
+    private async Task ButtonEventHandler(SD.ButtonAction action)
+    {
+        switch (action)
+        {
+            case SD.ButtonAction.Submit:
+                SubmitReview();
+                break;
+            case SD.ButtonAction.Cancel:
+                await CloseReviewEditor.InvokeAsync();
+                break;
+            default:
+                break;
+        }
+    }
+
     private async Task SubmitReview()
     {
         review.ActivityId = activity.Id;
         var userState = await _AuthenticationStateProvider.GetAuthenticationStateAsync();
         review.CustomerId = userState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        
         await _arr.CreateAsync(review);
-
-        activity.Reviews.Add(review);
         await _ar.UpdateAsync(activity);
+        await UpdateAverageScore.InvokeAsync();
 
     }
 }
